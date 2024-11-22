@@ -1,0 +1,77 @@
+version: '3.8'
+
+services:
+  frontend:
+    build: 
+      context: ./frontend
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    environment:
+      - REACT_APP_API_URL=http://localhost:5000/api
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    networks:
+      - app-network
+    depends_on:
+      - api_gateway
+
+  api_gateway:
+    build: 
+      context: ./backend
+      dockerfile: Dockerfile.api_gateway
+    ports:
+      - "5000:5000"
+    environment:
+      - UPLOAD_SERVICE_URL=http://upload_service:5001
+      - CONVERSION_SERVICE_URL=http://conversion_service:5002
+      - FLASK_ENV=development
+    volumes:
+      - ./backend:/app
+      - doc_uploads:/app/uploads
+      - doc_output:/app/output
+    networks:
+      - app-network
+    depends_on:
+      - upload_service
+      - conversion_service
+
+  upload_service:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile.upload_service
+    ports:
+      - "5001:5001"
+    environment:
+      - FLASK_ENV=development
+      - UPLOAD_FOLDER=/app/uploads
+    volumes:
+      - ./backend:/app
+      - doc_uploads:/app/uploads
+    networks:
+      - app-network
+
+  conversion_service:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile.conversion_service
+    ports:
+      - "5002:5002"
+    environment:
+      - FLASK_ENV=development
+      - OUTPUT_FOLDER=/app/output
+    volumes:
+      - ./backend:/app
+      - doc_uploads:/app/uploads
+      - doc_output:/app/output
+    networks:
+      - app-network
+
+networks:
+  app-network:
+    driver: bridge
+
+volumes:
+  doc_uploads:
+  doc_output:
