@@ -45,15 +45,38 @@ Before running this project, make sure you have the following installed on your 
    - Make sure Docker Desktop is running on your system
    - You should see the Docker icon in your system tray (Windows) or menu bar (Mac)
 
-3. **Build and Start the Application**
+3. **Run the Application**
+   You have two options to run the application:
+
+   Option 1 - Using run.sh script (recommended):
    ```bash
-   docker-compose up --build
+   # Start all services in background
+   sh run.sh start
+
+   # Start with visible logs
+   sh run.sh start-with-logs
+
+   # Check service status
+   sh run.sh status
+
+   # Stop all services
+   sh run.sh stop
+
+   # Run tests
+   sh run.sh test
    ```
-   - This command will:
-     * Download necessary Docker images
-     * Build all services (frontend, api_gateway, upload_service, conversion_service)
-     * Start all containers
-     * This process might take a few minutes on first run
+
+   Option 2 - Using Docker Compose directly:
+   ```bash
+   # Start all services with logs
+   docker-compose up --build
+
+   # Start in detached mode
+   docker-compose up --build -d
+
+   # Stop services
+   docker-compose down
+   ```
 
 4. **Access the Application**
    - Open your web browser and go to:
@@ -69,40 +92,112 @@ Before running this project, make sure you have the following installed on your 
    - Click Convert to start the conversion process
    - Download your converted PDF file
 
-## Hosted Endpoints
+## Quick Start - Running from Docker Hub
 
-You can test the application using our hosted endpoints:
+The fastest way to run the application is to pull the images directly from Docker Hub. No need to clone the repository!
 
-- Frontend UI: https://docconv-frontend.onrender.com
-- API Gateway: https://docconv-api.onrender.com
-- Upload Service: https://docconv-upload.onrender.com
-- Conversion Service: https://docconv-convert.onrender.com
+1. **Prerequisites**
+   - Docker Desktop installed and running
+   - 4GB RAM minimum
+   - Ports 3000, 5000, 5001, and 5002 available
 
-### Testing the API
+2. **Create Docker Network**
+   ```bash
+   docker network create rapidfort-net
+   ```
 
-You can test the API endpoints using curl or Postman:
+3. **Create Volumes for Document Storage**
+   ```bash
+   docker volume create doc_uploads
+   docker volume create doc_output
+   ```
 
-1. **Upload a DOCX file**
+4. **Pull and Run the Services**
+
+   a. Start Conversion Service:
+   ```bash
+   docker run -d --name conversion_service \
+     --network rapidfort-net \
+     -p 5002:5002 \
+     -v doc_uploads:/app/uploads \
+     -v doc_output:/app/output \
+     -e FLASK_ENV=development \
+     -e OUTPUT_FOLDER=/app/output \
+     kshitijagarwal24/rapidfort-backend:conversion-service
+   ```
+
+   b. Start Upload Service:
+   ```bash
+   docker run -d --name upload_service \
+     --network rapidfort-net \
+     -p 5001:5001 \
+     -v doc_uploads:/app/uploads \
+     -e FLASK_ENV=development \
+     -e UPLOAD_FOLDER=/app/uploads \
+     kshitijagarwal24/rapidfort-backend:upload-service
+   ```
+
+   c. Start API Gateway:
+   ```bash
+   docker run -d --name api_gateway \
+     --network rapidfort-net \
+     -p 5000:5000 \
+     -v doc_uploads:/app/uploads \
+     -v doc_output:/app/output \
+     -e FLASK_ENV=development \
+     -e UPLOAD_SERVICE_URL=http://upload_service:5001 \
+     -e CONVERSION_SERVICE_URL=http://conversion_service:5002 \
+     kshitijagarwal24/rapidfort-backend:api-gateway
+   ```
+
+   d. Start Frontend:
+   ```bash
+   docker run -d --name frontend \
+     --network rapidfort-net \
+     -p 3000:3000 \
+     -e REACT_APP_API_URL=http://localhost:5000/api \
+     kshitijagarwal24/rapidfort-frontend:latest
+   ```
+
+5. **Access the Application**
+   - Open your browser and go to: http://localhost:3000
+   - You can now upload DOCX files and convert them to PDF
+
+6. **Stop and Cleanup**
+   ```bash
+   # Stop all containers
+   docker stop frontend api_gateway upload_service conversion_service
+
+   # Remove containers
+   docker rm frontend api_gateway upload_service conversion_service
+
+   # Remove network
+   docker network rm rapidfort-net
+
+   # Remove volumes (optional - this will delete all uploaded and converted files)
+   docker volume rm doc_uploads doc_output
+   ```
+
+## Docker Images
+
+The application uses the following Docker Hub images:
+
+- Frontend: `kshitijagarwal24/rapidfort-frontend:latest`
+- Backend Services:
+  * API Gateway: `kshitijagarwal24/rapidfort-backend:api-gateway`
+  * Upload Service: `kshitijagarwal24/rapidfort-backend:upload-service`
+  * Conversion Service: `kshitijagarwal24/rapidfort-backend:conversion-service`
+
+You can pull these images directly:
 ```bash
-curl -X POST -F "file=@your-file.docx" https://docconv-api.onrender.com/api/upload
-```
+# Pull frontend
+docker pull kshitijagarwal24/rapidfort-frontend:latest
 
-2. **Convert to PDF**
-```bash
-curl -X POST -H "Content-Type: application/json" \
-  -d '{"filename": "your-file.docx", "password": "optional-password"}' \
-  https://docconv-api.onrender.com/api/convert
+# Pull backend services
+docker pull kshitijagarwal24/rapidfort-backend:api-gateway
+docker pull kshitijagarwal24/rapidfort-backend:upload-service
+docker pull kshitijagarwal24/rapidfort-backend:conversion-service
 ```
-
-3. **Download converted PDF**
-```bash
-curl -O https://docconv-api.onrender.com/api/download/your-file.pdf
-```
-
-### Rate Limits
-- Free tier limitations apply
-- Maximum file size: 10MB
-- Rate limit: 100 requests per hour
 
 ## Troubleshooting
 
@@ -150,7 +245,8 @@ If you encounter any issues:
 │   ├── api_gateway/        # API Gateway service
 │   ├── upload_service/     # Upload handling service
 │   └── conversion_service/ # Document conversion service
-└── docker-compose.yml      # Docker composition config
+├── docker-compose.yml      # Docker composition config
+└── run.sh                  # Application management script
 ```
 
 ## Development
@@ -166,4 +262,123 @@ docker-compose up --build frontend
 docker-compose up --build api_gateway
 docker-compose up --build upload_service
 docker-compose up --build conversion_service
+
 ```
+
+Follow these instructions to make the following change to my code document.
+
+Instruction: Adding a new section about running directly from Docker Hub
+
+Code Edit:
+```
+# Document Converter Platform
+
+A robust microservices-based document conversion platform that converts DOCX files to PDF with optional password protection. Built with React frontend and Flask backend services, containerized with Docker for easy deployment.
+
+## Features
+
+- DOCX to PDF conversion
+- Optional PDF password protection
+- Microservices architecture
+- Docker containerization
+- Cross-platform compatibility
+- Responsive web interface
+- Fast and efficient processing
+
+## Quick Start - Running from Docker Hub
+
+The fastest way to run the application is to pull the images directly from Docker Hub. No need to clone the repository!
+
+1. **Prerequisites**
+   - Docker Desktop installed and running
+   - 4GB RAM minimum
+   - Ports 3000, 5000, 5001, and 5002 available
+
+2. **Create Docker Network**
+   ```bash
+   docker network create rapidfort-net
+   ```
+
+3. **Create Volumes for Document Storage**
+   ```bash
+   docker volume create doc_uploads
+   docker volume create doc_output
+   ```
+
+4. **Pull and Run the Services**
+
+   a. Start Conversion Service:
+   ```bash
+   docker run -d --name conversion_service \
+     --network rapidfort-net \
+     -p 5002:5002 \
+     -v doc_uploads:/app/uploads \
+     -v doc_output:/app/output \
+     -e FLASK_ENV=development \
+     -e OUTPUT_FOLDER=/app/output \
+     kshitijagarwal24/rapidfort-backend:conversion-service
+   ```
+
+   b. Start Upload Service:
+   ```bash
+   docker run -d --name upload_service \
+     --network rapidfort-net \
+     -p 5001:5001 \
+     -v doc_uploads:/app/uploads \
+     -e FLASK_ENV=development \
+     -e UPLOAD_FOLDER=/app/uploads \
+     kshitijagarwal24/rapidfort-backend:upload-service
+   ```
+
+   c. Start API Gateway:
+   ```bash
+   docker run -d --name api_gateway \
+     --network rapidfort-net \
+     -p 5000:5000 \
+     -v doc_uploads:/app/uploads \
+     -v doc_output:/app/output \
+     -e FLASK_ENV=development \
+     -e UPLOAD_SERVICE_URL=http://upload_service:5001 \
+     -e CONVERSION_SERVICE_URL=http://conversion_service:5002 \
+     kshitijagarwal24/rapidfort-backend:api-gateway
+   ```
+
+   d. Start Frontend:
+   ```bash
+   docker run -d --name frontend \
+     --network rapidfort-net \
+     -p 3000:3000 \
+     -e REACT_APP_API_URL=http://localhost:5000/api \
+     kshitijagarwal24/rapidfort-frontend:latest
+   ```
+
+5. **Access the Application**
+   - Open your browser and go to: http://localhost:3000
+   - You can now upload DOCX files and convert them to PDF
+
+6. **Stop and Cleanup**
+   ```bash
+   # Stop all containers
+   docker stop frontend api_gateway upload_service conversion_service
+
+   # Remove containers
+   docker rm frontend api_gateway upload_service conversion_service
+
+   # Remove network
+   docker network rm rapidfort-net
+
+   # Remove volumes (optional - this will delete all uploaded and converted files)
+   docker volume rm doc_uploads doc_output
+   ```
+
+## Development Setup
+
+If you want to develop or modify the application, follow these steps to set up the development environment:
+
+1. **Clone the Repository**
+   ```bash
+   git clone https://github.com/Kshitij-2412/word-to-pdf-converter.git
+   cd word-to-pdf-converter
+   ```
+
+[Rest of the existing README content...]
