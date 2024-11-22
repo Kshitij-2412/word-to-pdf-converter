@@ -1,0 +1,74 @@
+name: Docker Build and Push
+
+on:
+  push:
+    branches: [ "master" ]
+  pull_request:
+    branches: [ "master" ]
+
+env:
+  DOCKER_HUB_USERNAME: kshitijagarwal24
+  # Define service names and their corresponding Dockerfile paths
+  FRONTEND_IMAGE: rapidfort-frontend
+  API_GATEWAY_IMAGE: rapidfort-backend
+  UPLOAD_SERVICE_IMAGE: rapidfort-backend
+  CONVERSION_SERVICE_IMAGE: rapidfort-backend
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ env.DOCKER_HUB_USERNAME }}
+          password: ${{ secrets.DOCKER_HUB_TOKEN }}
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+
+      # Build and push Frontend
+      - name: Build and push Frontend
+        uses: docker/build-push-action@v4
+        with:
+          context: ./frontend
+          push: true
+          tags: ${{ env.DOCKER_HUB_USERNAME }}/${{ env.FRONTEND_IMAGE }}:latest
+          cache-from: type=registry,ref=${{ env.DOCKER_HUB_USERNAME }}/${{ env.FRONTEND_IMAGE }}:buildcache
+          cache-to: type=registry,ref=${{ env.DOCKER_HUB_USERNAME }}/${{ env.FRONTEND_IMAGE }}:buildcache,mode=max
+
+      # Build and push API Gateway
+      - name: Build and push API Gateway
+        uses: docker/build-push-action@v4
+        with:
+          context: ./backend
+          file: ./backend/api_gateway/Dockerfile
+          push: true
+          tags: ${{ env.DOCKER_HUB_USERNAME }}/${{ env.API_GATEWAY_IMAGE }}:api-gateway
+          cache-from: type=registry,ref=${{ env.DOCKER_HUB_USERNAME }}/${{ env.API_GATEWAY_IMAGE }}:api-gateway-buildcache
+          cache-to: type=registry,ref=${{ env.DOCKER_HUB_USERNAME }}/${{ env.API_GATEWAY_IMAGE }}:api-gateway-buildcache,mode=max
+
+      # Build and push Upload Service
+      - name: Build and push Upload Service
+        uses: docker/build-push-action@v4
+        with:
+          context: ./backend
+          file: ./backend/upload_service/Dockerfile
+          push: true
+          tags: ${{ env.DOCKER_HUB_USERNAME }}/${{ env.UPLOAD_SERVICE_IMAGE }}:upload-service
+          cache-from: type=registry,ref=${{ env.DOCKER_HUB_USERNAME }}/${{ env.UPLOAD_SERVICE_IMAGE }}:upload-service-buildcache
+          cache-to: type=registry,ref=${{ env.DOCKER_HUB_USERNAME }}/${{ env.UPLOAD_SERVICE_IMAGE }}:upload-service-buildcache,mode=max
+
+      # Build and push Conversion Service
+      - name: Build and push Conversion Service
+        uses: docker/build-push-action@v4
+        with:
+          context: ./backend
+          file: ./backend/conversion_service/Dockerfile
+          push: true
+          tags: ${{ env.DOCKER_HUB_USERNAME }}/${{ env.CONVERSION_SERVICE_IMAGE }}:conversion-service
+          cache-from: type=registry,ref=${{ env.DOCKER_HUB_USERNAME }}/${{ env.CONVERSION_SERVICE_IMAGE }}:conversion-service-buildcache
+          cache-to: type=registry,ref=${{ env.DOCKER_HUB_USERNAME }}/${{ env.CONVERSION_SERVICE_IMAGE }}:conversion-service-buildcache,mode=max
