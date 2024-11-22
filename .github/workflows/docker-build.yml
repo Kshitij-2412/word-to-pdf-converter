@@ -1,5 +1,6 @@
 name: Docker Build and Push
 
+# Workflow to build and push Docker images to Docker Hub
 on:
   push:
     branches: [ "master" ]
