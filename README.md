@@ -10,7 +10,6 @@ A robust microservices-based document conversion platform that converts DOCX fil
 - Docker containerization
 - Cross-platform compatibility
 - Responsive web interface
-- Real-time conversion progress
 - Fast and efficient processing
 
 ## Architecture
@@ -30,7 +29,6 @@ The application consists of three main microservices:
 1. Clone the repository:
 ```bash
 git clone https://github.com/Kshitij-2412/word-to-pdf-converter.git
-cd word-to-pdf-converter
 ```
 
 2. Start the application:
@@ -84,18 +82,3 @@ docker-compose up --build upload_service
 docker-compose up --build conversion_service
 ```
 
-## Contributing
-
-1. Fork the repository
-2. Create your feature branch (`git checkout -b feature/AmazingFeature`)
-3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
-4. Push to the branch (`git push origin feature/AmazingFeature`)
-5. Open a Pull Request
-
-## License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
-## Support
-
-For support, please open an issue in the GitHub repository.
