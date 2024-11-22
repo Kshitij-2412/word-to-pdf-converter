@@ -3,6 +3,7 @@ from flask_cors import CORS
 import requests
 import os
 import logging
+from datetime import datetime
 
 app = Flask(__name__)
 
@@ -118,6 +119,16 @@ def download_file(filename):
     except Exception as e:
         logger.error(f"Error in download: {str(e)}")
         return jsonify({"error": str(e)}), 500
+
+@app.route('/health', methods=['GET'])
+def health_check():
+    """Health check endpoint for monitoring deployment status"""
+    return jsonify({
+        'status': 'healthy',
+        'timestamp': datetime.utcnow().isoformat(),
+        'service': 'wordtopdf-api',
+        'version': '1.0.0'
+    }), 200
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000, debug=True)

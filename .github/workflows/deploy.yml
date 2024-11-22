@@ -1,0 +1,35 @@
+name: Deploy to Render
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  deploy:
+    name: Deploy to Render
+    runs-on: ubuntu-latest
+    
+    steps:
+      - uses: actions/checkout@v2
+      
+      - name: Deploy to Render
+        uses: johnbeynon/render-deploy-action@v0.0.8
+        with:
+          service-id: ${{ secrets.RENDER_SERVICE_ID }}
+          api-key: ${{ secrets.RENDER_API_KEY }}
+          
+      - name: Wait for Deploy
+        run: |
+          echo "Waiting for deployment to complete..."
+          sleep 60  # Give some time for services to start
+          
+      - name: Test Deployment
+        run: |
+          echo "Testing API endpoints..."
+          curl -s -o /dev/null -w "%{http_code}" https://wordtopdf-api.onrender.com/health
+          echo "API Gateway is responding"
+          
+          curl -s -o /dev/null -w "%{http_code}" https://wordtopdf-frontend.onrender.com
+          echo "Frontend is responding"
