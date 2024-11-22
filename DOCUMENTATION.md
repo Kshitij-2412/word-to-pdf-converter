@@ -1,6 +1,6 @@
-# Rapid Fort Document Converter - Visual Guide
+# DOCX TO PDF Document Converter - Visual Guide
 
-This guide provides a visual walkthrough of the Rapid Fort Document Converter application, showing how to use its features and what to expect at each step.
+This guide provides a visual walkthrough of the DOCS TO PDF Document Converter application, showing how to use its features and what to expect at each step.
 
 ## Application Interface & Features
 
