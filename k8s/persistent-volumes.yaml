@@ -2,6 +2,7 @@ apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
   name: doc-uploads-pvc
+  namespace: rapidfort
 spec:
   accessModes:
     - ReadWriteMany
@@ -13,6 +14,7 @@ apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
   name: doc-output-pvc
+  namespace: rapidfort
 spec:
   accessModes:
     - ReadWriteMany

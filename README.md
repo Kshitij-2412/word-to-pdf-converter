@@ -178,6 +178,111 @@ The fastest way to run the application is to pull the images directly from Docke
    docker volume rm doc_uploads doc_output
    ```
 
+## Kubernetes Deployment
+
+### Prerequisites for Kubernetes Deployment
+- Kubernetes cluster (minikube/kind/etc.)
+- Ingress controller enabled
+- kubectl installed and configured
+
+### Deploying on Kubernetes
+
+1. **Start your Kubernetes cluster**
+   If using minikube:
+   ```bash
+   minikube start
+   ```
+
+2. **Enable Ingress Controller**
+   For minikube:
+   ```bash
+   minikube addons enable ingress
+   ```
+
+3. **Deploy the Application**
+   ```bash
+   # Create namespace
+   kubectl apply -f k8s/namespace.yaml
+
+   # Create persistent volumes
+   kubectl apply -f k8s/persistent-volumes.yaml
+
+   # Deploy services
+   kubectl apply -f k8s/api-gateway-deployment.yaml
+   kubectl apply -f k8s/upload-service-deployment.yaml
+   kubectl apply -f k8s/conversion-service-deployment.yaml
+   kubectl apply -f k8s/frontend-deployment.yaml
+
+   # Apply ingress configuration
+   kubectl apply -f k8s/ingress.yaml
+   ```
+
+4. **Access the Application**
+   If using minikube:
+   ```bash
+   # Start minikube tunnel in a separate terminal
+   minikube tunnel
+   ```
+   
+   The application will be available at:
+   - Frontend: http://localhost/
+   - API: http://localhost/api
+
+### Verifying the Deployment
+
+Check the status of your pods:
+```bash
+kubectl get pods -n rapidfort
+```
+
+Check the services:
+```bash
+kubectl get services -n rapidfort
+```
+
+Check the ingress:
+```bash
+kubectl get ingress -n rapidfort
+```
+
+### Troubleshooting Kubernetes Deployment
+
+1. **Pod Issues**
+   ```bash
+   # Check pod status
+   kubectl get pods -n rapidfort
+   
+   # Check pod logs
+   kubectl logs -n rapidfort <pod-name>
+   
+   # Describe pod for more details
+   kubectl describe pod -n rapidfort <pod-name>
+   ```
+
+2. **Service Issues**
+   ```bash
+   # Check service status
+   kubectl get services -n rapidfort
+   
+   # Describe service
+   kubectl describe service -n rapidfort <service-name>
+   ```
+
+3. **Ingress Issues**
+   ```bash
+   # Check ingress status
+   kubectl get ingress -n rapidfort
+   
+   # Describe ingress
+   kubectl describe ingress -n rapidfort
+   ```
+
+4. **Common Issues**
+   - If pods are in "Pending" state, check if PersistentVolumes are properly configured
+   - If pods are in "ImagePullBackOff", verify internet connection and image names
+   - If services are not accessible, ensure minikube tunnel is running
+   - If ingress is not working, verify that the ingress controller is enabled
+
 ## Docker Images
 
 The application uses the following Docker Hub images:
@@ -247,5 +352,3 @@ If you encounter any issues:
 │   └── conversion_service/ # Document conversion service
 ├── docker-compose.yml      # Docker composition config
 └── run.sh                  # Application management script
-```
-

@@ -1,0 +1,44 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: conversion-service
+  namespace: rapidfort
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: conversion-service
+  template:
+    metadata:
+      labels:
+        app: conversion-service
+    spec:
+      containers:
+      - name: conversion-service
+        image: kshitijagarwal24/rapidfort-backend:conversion-service
+        ports:
+        - containerPort: 5002
+        env:
+        - name: OUTPUT_FOLDER
+          value: /app/output
+        - name: FLASK_ENV
+          value: development
+        volumeMounts:
+        - name: output
+          mountPath: /app/output
+      volumes:
+      - name: output
+        persistentVolumeClaim:
+          claimName: doc-output-pvc
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: conversion-service
+  namespace: rapidfort
+spec:
+  ports:
+  - port: 5002
+    targetPort: 5002
+  selector:
+    app: conversion-service
