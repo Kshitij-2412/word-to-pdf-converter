@@ -69,6 +69,41 @@ Before running this project, make sure you have the following installed on your 
    - Click Convert to start the conversion process
    - Download your converted PDF file
 
+## Hosted Endpoints
+
+You can test the application using our hosted endpoints:
+
+- Frontend UI: https://docconv-frontend.onrender.com
+- API Gateway: https://docconv-api.onrender.com
+- Upload Service: https://docconv-upload.onrender.com
+- Conversion Service: https://docconv-convert.onrender.com
+
+### Testing the API
+
+You can test the API endpoints using curl or Postman:
+
+1. **Upload a DOCX file**
+```bash
+curl -X POST -F "file=@your-file.docx" https://docconv-api.onrender.com/api/upload
+```
+
+2. **Convert to PDF**
+```bash
+curl -X POST -H "Content-Type: application/json" \
+  -d '{"filename": "your-file.docx", "password": "optional-password"}' \
+  https://docconv-api.onrender.com/api/convert
+```
+
+3. **Download converted PDF**
+```bash
+curl -O https://docconv-api.onrender.com/api/download/your-file.pdf
+```
+
+### Rate Limits
+- Free tier limitations apply
+- Maximum file size: 10MB
+- Rate limit: 100 requests per hour
+
 ## Troubleshooting
 
 If you encounter any issues:
@@ -132,4 +167,3 @@ docker-compose up --build api_gateway
 docker-compose up --build upload_service
 docker-compose up --build conversion_service
 ```
-
