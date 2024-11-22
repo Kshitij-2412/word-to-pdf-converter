@@ -1,115 +1,101 @@
-# Document Converter
+# Document Converter Platform
 
-A robust microservices-based document conversion platform that converts DOCX files to password-protected PDFs.
+A robust microservices-based document conversion platform that converts DOCX files to PDF with optional password protection. Built with React frontend and Flask backend services, containerized with Docker for easy deployment.
 
 ## Features
 
-- DOCX to PDF conversion with LibreOffice
-- Secure PDF password protection using PyPDF2
-- Modern React-based frontend with drag-and-drop
-- Microservices architecture with Docker containerization
-- Real-time conversion progress tracking
-- Secure file handling and cleanup
+- DOCX to PDF conversion
+- Optional PDF password protection
+- Microservices architecture
+- Docker containerization
+- Cross-platform compatibility
+- Responsive web interface
+- Real-time conversion progress
+- Fast and efficient processing
 
 ## Architecture
 
-The application consists of four main components:
-- Frontend (React, port 3000)
-- API Gateway (Flask, port 5000)
-- Upload Service (Flask, port 5001)
-- Conversion Service (Flask, port 5002)
+The application consists of three main microservices:
+1. **API Gateway** - Routes requests and handles client communication
+2. **Upload Service** - Manages file uploads and storage
+3. **Conversion Service** - Handles document conversion and PDF protection
 
 ## Prerequisites
 
 - Docker and Docker Compose
-- Node.js 16+ (for frontend development)
-- Python 3.9+ (for backend development)
-- LibreOffice (installed in conversion service container)
+- Git
 
 ## Quick Start
 
 1. Clone the repository:
 ```bash
-git clone https://github.com/YOUR_USERNAME/document-converter.git
-cd document-converter
+git clone https://github.com/Kshitij-2412/word-to-pdf-converter.git
+cd word-to-pdf-converter
 ```
 
 2. Start the application:
 ```bash
-docker-compose up -d
+docker-compose up --build
 ```
 
 3. Access the application:
-   - Open http://localhost:3000 in your browser
-   - Upload a DOCX file
-   - Optionally set a password for PDF protection
-   - Click Convert
-   - Download and open the converted PDF
+- Frontend: http://localhost:3000
+- API Gateway: http://localhost:5000
 
-## Development Setup
+## API Endpoints
 
-### Frontend
+### API Gateway (Port 5000)
+- `POST /api/upload` - Upload DOCX file
+- `POST /api/convert` - Convert DOCX to PDF
+- `GET /api/download/{filename}` - Download converted PDF
+
+### Upload Service (Port 5001)
+- `POST /upload` - Handle file upload
+
+### Conversion Service (Port 5002)
+- `POST /convert` - Convert documents
+- `POST /protect` - Add password protection to PDF
+
+## Development
+
+### Project Structure
+```
+.
+├── frontend/                 # React frontend application
+├── backend/                 # Backend services
+│   ├── api_gateway/        # API Gateway service
+│   ├── upload_service/     # Upload handling service
+│   └── conversion_service/ # Document conversion service
+└── docker-compose.yml      # Docker composition config
+```
+
+### Environment Variables
+All necessary environment variables are included in the repository for easy setup.
+
+### Building for Development
 ```bash
-cd frontend
-npm install
-npm start
+# Start all services
+docker-compose up --build
+
+# Start individual services
+docker-compose up --build frontend
+docker-compose up --build api_gateway
+docker-compose up --build upload_service
+docker-compose up --build conversion_service
 ```
-
-### Backend Services
-```bash
-# API Gateway
-cd backend/api_gateway
-python -m venv venv
-source venv/bin/activate  # or `venv\Scripts\activate` on Windows
-pip install -r requirements.txt
-flask run --port 5000
-
-# Similar steps for upload_service and conversion_service
-```
-
-## Environment Configuration
-
-### Frontend (.env)
-```
-REACT_APP_API_URL=http://localhost:5000/api
-```
-
-### Backend (docker-compose.yml)
-```
-UPLOAD_SERVICE_URL=http://upload_service:5001
-CONVERSION_SERVICE_URL=http://conversion_service:5002
-```
-
-## Docker Deployment
-
-Build and run all services:
-```bash
-docker-compose up --build -d
-```
-
-Individual services:
-```bash
-docker-compose up --build -d frontend
-docker-compose up --build -d api_gateway
-docker-compose up --build -d upload_service
-docker-compose up --build -d conversion_service
-```
-
-## Security Features
-
-- PDF password protection using industry-standard encryption
-- Secure file handling with automatic cleanup
-- CORS configuration for secure cross-origin requests
-- Environment-based configuration management
 
 ## Contributing
 
 1. Fork the repository
-2. Create a feature branch
-3. Commit your changes
-4. Push to the branch
-5. Create a Pull Request
+2. Create your feature branch (`git checkout -b feature/AmazingFeature`)
+3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
+4. Push to the branch (`git push origin feature/AmazingFeature`)
+5. Open a Pull Request
 
 ## License
 
-[MIT License](LICENSE)
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## Support
+
+For support, please open an issue in the GitHub repository.
